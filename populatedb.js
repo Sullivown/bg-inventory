@@ -305,20 +305,40 @@ function createBoardgameInstances(cb) {
 	async.parallel(
 		[
 			function (callback) {
-				boardgameInstanceCreate(callback);
-				boardgames[0], false, false, false, callback;
+				boardgameInstanceCreate(
+					boardgames[0],
+					false,
+					false,
+					false,
+					callback
+				);
 			},
 			function (callback) {
-				boardgameInstanceCreate(callback);
-				boardgames[0], false, false, false, callback;
+				boardgameInstanceCreate(
+					boardgames[0],
+					false,
+					false,
+					false,
+					callback
+				);
 			},
 			function (callback) {
-				boardgameInstanceCreate(callback);
-				boardgames[1], false, false, false, callback;
+				boardgameInstanceCreate(
+					boardgames[1],
+					false,
+					false,
+					false,
+					callback
+				);
 			},
 			function (callback) {
-				boardgameInstanceCreate(callback);
-				boardgames[2], false, false, false, callback;
+				boardgameInstanceCreate(
+					boardgames[2],
+					false,
+					false,
+					false,
+					callback
+				);
 			},
 		],
 		// Optional callback

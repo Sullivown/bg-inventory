@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const DesignerSchema = new Schema({
-	name: { Type: String, required: true },
+	name: { type: String, required: true },
 });
 
 DesignerSchema.virtual('url').get(function () {

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const PublisherSchema = new Schema({
-	name: { Type: String, required: true },
-	website: { Type: String },
+	name: { type: String, required: true },
+	website: { type: String },
 });
 
 PublisherSchema.virtual('url').get(function () {
