@@ -1,0 +1,14 @@
+extends layout 
+
+block content
+	h1= title 
+
+	h2= designer.name
+
+	ul
+		each boardgame in designer_boardgames
+			li
+				a(href=boardgame.url) #{boardgame.title} 
+		
+		else 
+			li No boardgames!
