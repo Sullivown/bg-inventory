@@ -6,7 +6,7 @@ block content
 
   form(method='POST' action='')
     div.form-group
-      label(for='first_name') Designer Name:
+      label(for='name') Designer Name:
       input#name.form-control(type='text' placeholder='Designer full name' name='name' required='true' value=(undefined===designer ? '' : designer.name) )
     button.btn.btn-primary(type='submit') Submit
   if errors

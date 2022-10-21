@@ -3,7 +3,6 @@ const Boardgame = require('../models/boardgame');
 
 const async = require('async');
 const { body, validationResult } = require('express-validator');
-const designer = require('../models/designer');
 
 exports.designer_list = function (req, res, next) {
 	Designer.find()
@@ -74,7 +73,6 @@ exports.designer_create_post = [
 			return;
 		}
 		// Data from form is valid.
-
 		// Create a Designer object with escaped and trimmed data.
 		const designer = new Designer({
 			name: req.body.name,
@@ -88,41 +86,6 @@ exports.designer_create_post = [
 		});
 	},
 ];
-
-exports.designer_delete_get = function (req, res, next) {
-	async.parallel(
-		{
-			designer(callback) {
-				Designer.findById(req.params.id).exec(callback);
-			},
-			designers_boardgames(callback) {
-				Boardgame.find({ designers: req.params.id }).exec(callback);
-			},
-		},
-		(err, results) => {
-			if (err) {
-				return next(err);
-			}
-			if (results.designer == null) {
-				res.redirect('/designer');
-			}
-			res.render('designer_delete', {
-				title: 'Delete Designer',
-				designer: results.designer,
-				designer_boardgames: results.designers_boardgames,
-			});
-		}
-	);
-};
-
-exports.designer_delete_post = function (req, res, next) {
-	Designer.findByIdAndDelete(req.params.id, (err) => {
-		if (err) {
-			return next(err);
-		}
-		res.redirect('/designer');
-	});
-};
 
 exports.designer_update_get = function (req, res, next) {
 	Designer.findById(req.params.id).exec(function (err, designer) {
@@ -177,3 +140,81 @@ exports.designer_update_post = [
 		);
 	},
 ];
+
+exports.designer_delete_get = function (req, res, next) {
+	async.parallel(
+		{
+			designer(callback) {
+				Designer.findById(req.params.id).exec(callback);
+			},
+			designers_boardgames(callback) {
+				Boardgame.find({ designers: req.params.id }).exec(callback);
+			},
+		},
+		(err, results) => {
+			if (err) {
+				return next(err);
+			}
+			if (results.designer == null) {
+				res.redirect('/designer');
+			}
+			res.render('designer_delete', {
+				title: 'Delete Designer',
+				designer: results.designer,
+				designer_boardgames: results.designers_boardgames,
+			});
+		}
+	);
+};
+
+exports.designer_delete_post = function (req, res, next) {
+	async.parallel(
+		{
+			designer(callback) {
+				Designer.findById(req.params.id).exec(callback);
+			},
+			designers_boardgames(callback) {
+				Boardgame.find({ designers: req.params.id }).exec(callback);
+			},
+		},
+		(err, results) => {
+			if (err) {
+				return next(err);
+			}
+			if (results.designer == null) {
+				res.redirect('/designer');
+			}
+			if (results.designers_boardgames !== null) {
+				results.designers_boardgames.forEach((boardgame) => {
+					Boardgame.findById(boardgame._id).exec(function (
+						err,
+						game
+					) {
+						if (err) {
+							return next(err);
+						}
+						const filteredDesigners = game.designers.filter(
+							(designer) => designer !== results.designer
+						);
+						Boardgame.findByIdAndUpdate(
+							boardgame._id,
+							{ designers: filteredDesigners },
+							(err) => {
+								if (err) {
+									return next(err);
+								}
+							}
+						);
+					});
+				});
+			}
+
+			Designer.findByIdAndDelete(req.params.id, (err) => {
+				if (err) {
+					return next(err);
+				}
+				res.redirect('/designer');
+			});
+		}
+	);
+};

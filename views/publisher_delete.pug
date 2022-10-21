@@ -1,0 +1,29 @@
+extends layout 
+
+block content 
+	h1= title 
+
+	h2= publisher.name
+
+	if publisher_boardgames.length
+		p This publisher is attributed to the following Boardgames:
+		ul
+			each boardgame in publisher_boardgames 
+				li= boardgame.title
+		
+		p Deleting them will remove them from the publishers field of all games listed above.
+	
+	else
+		p This publisher is not attributed to any board games.
+	
+	hr
+	p Are you sure you want to delete this publisher?
+
+	form(method='POST' action='')
+		div.form-group
+			input#publisherid.form-control(type='hidden',name='publisherid', required='true', value=publisher._id )
+
+		button.btn.btn-primary(type='submit') Delete
+
+	form(method='GET' action=publisher.url)
+		button.btn.btn-primary(type='submit') Cancel

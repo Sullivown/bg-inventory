@@ -1,0 +1,24 @@
+extends layout 
+
+block content
+	h1= title 
+
+	h2= publisher.name
+	p Offical Link: 
+		a(href=publisher.website) #{publisher.website}
+
+	h3 Boardgames:
+	ul
+		each boardgame in publisher_boardgames
+			li
+				a(href=boardgame.url) #{boardgame.title} 
+		
+		else 
+			li No boardgames!
+	
+	hr
+	a(href=`${publisher.url}/update`) Update Publisher
+	|
+	|
+
+	a(href=`${publisher.url}/delete`) Delete Publisher
