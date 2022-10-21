@@ -1,0 +1,38 @@
+extends layout 
+
+block content
+	h1= title
+
+	h2= boardgame.title
+	p= boardgame.description.short
+
+	h3 Description
+	p= boardgame.description.full
+
+	h3 Details
+	p #[strong Designers: ]
+		each val, index in boardgame.designers
+			a(href=val.url) #{val.name}
+			if index < boardgame.designers.length - 1
+				|, 
+	p #[strong Players:] #{boardgame.number_of_players.min} - #{boardgame.number_of_players.max}
+	p #[strong Playing Time:] #{boardgame.playing_time.min} - #{boardgame.playing_time.max} minutes
+	p #[strong Weight:] #{boardgame.weight}
+	p #[strong Release Year:] #{boardgame.release_year}
+	p #[strong Publishers: ]
+		each val, index in boardgame.publishers
+			a(href=val.url) #{val.name}
+			if index < boardgame.publishers.length - 1
+				|, 
+	p #[strong Categories: ]
+		each val, index in boardgame.categories
+			a(href=val.url) #{val.name}
+			if index < boardgame.categories.length - 1
+				|, 
+
+	hr
+	a(href=`${boardgame.url}/update`) Update Board Game
+	|
+	|
+
+	a(href=`${boardgame.url}/delete`) Delete Board Game

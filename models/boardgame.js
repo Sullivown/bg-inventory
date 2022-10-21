@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const BoardGameSchema = new Schema({
 	title: { type: String, required: true },
-	release_year: { type: Date },
+	release_year: { type: Number, minlength: 4, maxlength: 4 },
 	designers: [
 		{ type: Schema.Types.ObjectId, ref: 'Designer', required: true },
 	],

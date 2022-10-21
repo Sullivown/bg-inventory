@@ -1,0 +1,15 @@
+extends layout 
+
+block content
+	h1= title 
+
+	ul
+		each boardgame in boardgame_list 
+			li
+				a(href=boardgame.url) #{boardgame.title}
+		
+		else
+			li There are no boardgames!
+	
+	hr
+	a(href='/boardgame/create') Create New Boardgame

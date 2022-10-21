@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 const designerRouter = require('./routes/designer');
 const publisherRouter = require('./routes/publisher');
 const categoryRouter = require('./routes/category');
+const boardgameRouter = require('./routes/boardgame');
 
 var app = express();
 
@@ -36,6 +37,7 @@ app.use('/users', usersRouter);
 app.use('/designer', designerRouter);
 app.use('/publisher', publisherRouter);
 app.use('/category', categoryRouter);
+app.use('/boardgame', boardgameRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
