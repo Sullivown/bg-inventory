@@ -45,7 +45,36 @@ exports.boardgame_detail = function (req, res, next) {
 };
 
 exports.boardgame_create_get = function (req, res, next) {
-	res.render('boardgame_form', { title: 'Create Boardgame' });
+	async.parallel(
+		{
+			designers(callback) {
+				Designer.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+			publishers(callback) {
+				Publisher.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+			categories(callback) {
+				Category.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+		},
+		(err, results) => {
+			if (err) {
+				return next(err);
+			}
+			res.render('boardgame_form', {
+				title: 'Create Boardgame',
+				designers: results.designers,
+				publishers: results.publishers,
+				categories: results.categories,
+			});
+		}
+	);
 };
 
 exports.boardgame_create_post = [

@@ -1,0 +1,59 @@
+extends layout 
+
+block content
+
+	h1=title
+
+	form(method='POST' action='')
+		div.form-group
+			label(for='title') Title:
+			input#title.form-control(type='text' placeholder='Title' name='title' required='true' value=(undefined===boardgame ? '' : boardgame.title))
+		div.form-group
+			label(for='release_year') Release Year:
+			input#release_year.form-control(type='number' placeholder='2022' min=0 name='release_year' value=(undefined===boardgame ? '' : boardgame.release_year))
+		div.form-group
+			label(for='short_description') Short Description:
+			textarea#short_description(name="short_description", cols="30", rows="10" value=(undefined===boardgame ? '' : boardgame.short_description)) 
+		div.form-group
+			label(for='full_description') Full Description:
+			textarea#full_description(name="full_description", cols="30", rows="10" value=(undefined===boardgame ? '' : boardgame.full_description)) 
+		div.form-group
+			label(for='min_players') Min Players:
+			input#min_players.form-control(type='number' placeholder='0' min=0 name='min_players' value=(undefined===boardgame ? '' : boardgame.number_of_players.min))
+			label(for='max_players') Max Players:
+			input#max_players.form-control(type='number' placeholder='0' min=0 name='max_players' value=(undefined===boardgame ? '' : boardgame.number_of_players.max))
+		div.form-group
+			label(for='min_playing_time') Min Playing Time:
+			input#min_playing_time.form-control(type='number' placeholder='0' min=0 name='min_playing_time' value=(undefined===boardgame ? '' : boardgame.playing_time.min))
+			label(for='max_playing_time') Max Playing Time:
+			input#max_playing_time.form-control(type='number' placeholder='0' min=0 name='max_playing_time' value=(undefined===boardgame ? '' : boardgame.playing_time.max))
+		div.form-group
+			label(for='weight') weight:
+			input#weight.form-control(type='number' placeholder='0' min=0 max=5 step=0.1 name='weight' value=(undefined===boardgame ? '' : boardgame.weight))
+		div.form-group
+			label Designers:
+				div
+				for designer in designers
+					div(style='display: inline; padding-right:10px;')
+						input.checkbox-input(type='checkbox', name='designers', id=designer._id, value=designer._id, checked=designer.checked )
+						label(for=designer._id) #{designer.name}
+		div.form-group
+			label Publishers:
+				div
+				for publisher in publishers
+					div(style='display: inline; padding-right:10px;')
+						input.checkbox-input(type='checkbox', name='publishers', id=publisher._id, value=publisher._id, checked=publisher.checked )
+						label(for=publisher._id) #{publisher.name}
+		div.form-group
+			label Categories:
+				div
+				for category in categories
+					div(style='display: inline; padding-right:10px;')
+						input.checkbox-input(type='checkbox', name='categories', id=category._id, value=category._id, checked=category.checked )
+						label(for=category._id) #{category.name}
+		button.btn.btn-primary(type='submit') Submit
+	
+	if errors
+		ul
+			for error in errors
+				li!= error.msg
