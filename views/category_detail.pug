@@ -3,12 +3,11 @@ extends layout
 block content
 	h1= title 
 
-	h2= designer.name
+	h2= category.name
 
 	h3 Boardgames:
-
 	ul
-		each boardgame in designer_boardgames
+		each boardgame in category_boardgames
 			li
 				a(href=boardgame.url) #{boardgame.title} 
 		
@@ -16,8 +15,8 @@ block content
 			li No boardgames!
 	
 	hr
-	a(href=`${designer.url}/update`) Update Designer
+	a(href=`${category.url}/update`) Update Category
 	|
 	|
 
-	a(href=`${designer.url}/delete`) Delete Designer
+	a(href=`${category.url}/delete`) Delete Category
