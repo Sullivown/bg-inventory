@@ -1,0 +1,29 @@
+extends layout 
+
+block content 
+	h1= title 
+
+	h2= boardgame.name
+
+	if boardgame_instances.length
+		p This Board Game is attributed to the following Board Game Instances:
+		ul
+			each instance in boardgame_instances 
+				li #{instance._id} - #{boardgame.title}
+		
+		p Deleting this Board Game will also delete all Board Game instances listed above.
+	
+	else
+		p This Board Game is not attributed to any Board Game instances.
+	
+	hr
+	p Are you sure you want to delete this Board Game?
+
+	form(method='POST' action='')
+		div.form-group
+			input#boardgameid.form-control(type='hidden',name='boardgameid', required='true', value=boardgame._id )
+
+		button.btn.btn-primary(type='submit') Delete
+
+	form(method='GET' action=boardgame.url)
+		button.btn.btn-primary(type='submit') Cancel

@@ -37,7 +37,7 @@ exports.boardgame_detail = function (req, res, next) {
 				return next(err);
 			}
 			res.render('boardgame_detail', {
-				title: 'Boardgame Detail',
+				title: 'Board Game Detail',
 				boardgame: results.boardgame,
 			});
 		}
@@ -495,8 +495,10 @@ exports.boardgame_delete_get = function (req, res, next) {
 			boardgame(callback) {
 				Boardgame.findById(req.params.id).exec(callback);
 			},
-			boardgames_boardgames(callback) {
-				Boardgame.find({ boardgames: req.params.id }).exec(callback);
+			boardgames_instances(callback) {
+				BoardgameInstance.find({ boardgame: req.params.id }).exec(
+					callback
+				);
 			},
 		},
 		(err, results) => {
@@ -509,7 +511,7 @@ exports.boardgame_delete_get = function (req, res, next) {
 			res.render('boardgame_delete', {
 				title: 'Delete Boardgame',
 				boardgame: results.boardgame,
-				boardgame_boardgames: results.boardgames_boardgames,
+				boardgame_instances: results.boardgames_instances,
 			});
 		}
 	);
@@ -521,8 +523,10 @@ exports.boardgame_delete_post = function (req, res, next) {
 			boardgame(callback) {
 				Boardgame.findById(req.params.id).exec(callback);
 			},
-			boardgames_boardgames(callback) {
-				Boardgame.find({ boardgames: req.params.id }).exec(callback);
+			boardgames_instances(callback) {
+				BoardgameInstance.find({ boardgame: req.params.id }).exec(
+					callback
+				);
 			},
 		},
 		(err, results) => {
@@ -532,27 +536,13 @@ exports.boardgame_delete_post = function (req, res, next) {
 			if (results.boardgame == null) {
 				res.redirect('/boardgame');
 			}
-			if (results.boardgames_boardgames !== null) {
-				results.boardgames_boardgames.forEach((boardgame) => {
-					Boardgame.findById(boardgame._id).exec(function (
-						err,
-						game
-					) {
+			if (results.boardgames_instances !== null) {
+				results.boardgames_instances.forEach((instance) => {
+					BoardgameInstance.findByIdAndDelete(instance, (err) => {
 						if (err) {
 							return next(err);
 						}
-						const filteredBoardgames = game.boardgames.filter(
-							(boardgame) => boardgame !== results.boardgame
-						);
-						Boardgame.findByIdAndUpdate(
-							boardgame._id,
-							{ boardgames: filteredBoardgames },
-							(err) => {
-								if (err) {
-									return next(err);
-								}
-							}
-						);
+						res.redirect('/boardgame');
 					});
 				});
 			}
