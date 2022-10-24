@@ -1,5 +1,18 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+	h1= title
+	p Welcome to #{title}
+
+	h2 Navigate: 
+	ul 
+		li 
+			a(href='/boardgame') Board Games
+		li 
+			a(href='/boardgameinstances') Board Game Instances 
+		li 
+			a(href='/designer') Designers 
+		li 
+			a(href='/publisher') Publishers
+		li 
+			a(href='/category') Categories 

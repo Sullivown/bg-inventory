@@ -13,7 +13,7 @@ block content
 			input#release_year.form-control(type='number' placeholder='2022' min=0 name='release_year' value=(undefined===boardgame ? '' : boardgame.release_year))
 		div.form-group
 			label(for='short_description') Short Description:
-			textarea#short_description(name="short_description", cols="30", rows="10" value=(undefined===boardgame ? '' : boardgame.short_description)) 
+			textarea#short_description(name="short_description", cols="30", rows="5" value=(undefined===boardgame ? '' : boardgame.short_description)) 
 		div.form-group
 			label(for='full_description') Full Description:
 			textarea#full_description(name="full_description", cols="30", rows="10" value=(undefined===boardgame ? '' : boardgame.full_description)) 

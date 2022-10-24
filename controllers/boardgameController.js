@@ -78,35 +78,162 @@ exports.boardgame_create_get = function (req, res, next) {
 };
 
 exports.boardgame_create_post = [
-	body('name')
+	// Convert the designers, publishers and categories to an array.
+	(req, res, next) => {
+		if (!Array.isArray(req.body.designers)) {
+			req.body.designers =
+				typeof req.body.designers === 'undefined'
+					? []
+					: [req.body.designers];
+		}
+		if (!Array.isArray(req.body.publishers)) {
+			req.body.publishers =
+				typeof req.body.publishers === 'undefined'
+					? []
+					: [req.body.publishers];
+		}
+		if (!Array.isArray(req.body.categories)) {
+			req.body.categories =
+				typeof req.body.categories === 'undefined'
+					? []
+					: [req.body.categories];
+		}
+		next();
+	},
+
+	// Validate and sanitize data
+	body('title')
 		.trim()
 		.isLength({ min: 1 })
 		.escape()
 		.withMessage('You must enter a name'),
-	body('website')
+	body('release_year')
 		.trim()
-		.optional({ checkFalsy: true })
-		.isURL()
-		.withMessage('You must enter a valid url'),
+		.escape()
+		.isNumeric()
+		.withMessage('You must enter a year in numeric format')
+		.isLength({ min: 4, max: 4 })
+		.withMessage('You must enter a year using the format YYYY')
+		.optional({ checkFalsy: true }),
+	body('min_players')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Min players: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Min players: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('max_players')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Max players: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Max players: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('min_playing_time')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Min playing time: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Min playing time: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('max_playing_time')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Max playing time: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Max playing time: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('weight')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Weight: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Weight: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
 	(req, res, next) => {
 		const errors = validationResult(req);
 
+		const boardgame = new Boardgame({
+			title: req.body.title,
+			release_year: req.body.release_year || undefined,
+			designers: req.body.designers,
+			publishers: req.body.publishers,
+			description: {
+				short: req.body.short_description,
+				full: req.body.full_description,
+			},
+			number_of_players: {
+				min: req.body.min_players || undefined,
+				max: req.body.max_players || undefined,
+			},
+			playing_time: {
+				min: req.body.min_playing_time || undefined,
+				max: req.body.max_playing_time || undefined,
+			},
+			weight: req.body.weight || undefined,
+			categories: req.body.categories,
+		});
+
 		if (!errors.isEmpty()) {
-			// There are errors. Render form again with sanitized values/errors messages.
-			res.render('boardgame_form', {
-				title: 'Create Boardgame',
-				boardgame: req.body,
-				errors: errors.array(),
-			});
+			async.parallel(
+				{
+					designers(callback) {
+						Designer.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+					publishers(callback) {
+						Publisher.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+					categories(callback) {
+						Category.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+				},
+				(err, results) => {
+					if (err) {
+						return next(err);
+					}
+					// Mark selected designers, publishers and categories as checked
+					for (const designer of results.designers) {
+						if (boardgame.designers.includes(designer._id)) {
+							designer.checked = 'true';
+						}
+					}
+					for (const publisher of results.publishers) {
+						if (boardgame.publishers.includes(publisher._id)) {
+							publisher.checked = 'true';
+						}
+					}
+					for (const category of results.categories) {
+						if (boardgame.categories.includes(category._id)) {
+							category.checked = 'true';
+						}
+					}
+					// There are errors. Render form again with sanitized values/errors messages.
+					res.render('boardgame_form', {
+						title: 'Create Boardgame',
+						boardgame,
+						designers: results.designers,
+						publishers: results.publishers,
+						categories: results.categories,
+						errors: errors.array(),
+					});
+				}
+			);
 			return;
 		}
 
 		// Otherwise form is valid
 		// Create new boardgame and redirect to detail view on success
-		const boardgame = new Boardgame({
-			name: req.body.name,
-			website: req.body.website,
-		});
 
 		boardgame.save((err) => {
 			if (err) {
@@ -118,44 +245,235 @@ exports.boardgame_create_post = [
 ];
 
 exports.boardgame_update_get = function (req, res, next) {
-	Boardgame.findById(req.params.id).exec(function (err, boardgame) {
-		if (err) {
-			return next(err);
+	async.parallel(
+		{
+			boardgame(callback) {
+				Boardgame.findById(req.params.id)
+					.populate('designers')
+					.populate('publishers')
+					.populate('categories')
+					.exec(callback);
+			},
+			designers(callback) {
+				Designer.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+			publishers(callback) {
+				Publisher.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+			categories(callback) {
+				Category.find()
+					.sort([['name', 'ascending']])
+					.exec(callback);
+			},
+		},
+		(err, results) => {
+			if (err) {
+				return next(err);
+			}
+			// Mark selected designers, publishers and categories as checked
+			for (const designer of results.designers) {
+				for (const boardgameDesigner of results.boardgame.designers) {
+					if (
+						designer._id.toString() ===
+						boardgameDesigner._id.toString()
+					) {
+						designer.checked = 'true';
+					}
+				}
+			}
+			for (const publisher of results.publishers) {
+				for (const boardgamePublisher of results.boardgame.publishers) {
+					if (
+						publisher._id.toString() ===
+						boardgamePublisher._id.toString()
+					) {
+						publisher.checked = 'true';
+					}
+				}
+			}
+			for (const category of results.categories) {
+				for (const boardgameCategory of results.boardgame.categories) {
+					if (
+						category._id.toString() ===
+						boardgameCategory._id.toString()
+					) {
+						category.checked = 'true';
+					}
+				}
+			}
+
+			res.render('boardgame_form', {
+				title: 'Boardgame Detail',
+				boardgame: results.boardgame,
+				designers: results.designers,
+				publishers: results.publishers,
+				categories: results.categories,
+			});
 		}
-		res.render('boardgame_form', {
-			title: 'Boardgame Detail',
-			boardgame: boardgame,
-		});
-	});
+	);
 };
 
 exports.boardgame_update_post = [
-	body('name')
+	// Convert the designers, publishers and categories to an array.
+	(req, res, next) => {
+		if (!Array.isArray(req.body.designers)) {
+			req.body.designers =
+				typeof req.body.designers === 'undefined'
+					? []
+					: [req.body.designers];
+		}
+		if (!Array.isArray(req.body.publishers)) {
+			req.body.publishers =
+				typeof req.body.publishers === 'undefined'
+					? []
+					: [req.body.publishers];
+		}
+		if (!Array.isArray(req.body.categories)) {
+			req.body.categories =
+				typeof req.body.categories === 'undefined'
+					? []
+					: [req.body.categories];
+		}
+		next();
+	},
+
+	// Validate and sanitize data
+	body('title')
 		.trim()
 		.isLength({ min: 1 })
 		.escape()
 		.withMessage('You must enter a name'),
-	body('website').trim().isURL().withMessage('You must enter a valid url'),
+	body('release_year')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('You must enter a year in numeric format')
+		.isLength({ min: 4, max: 4 })
+		.withMessage('You must enter a year using the format YYYY')
+		.optional({ checkFalsy: true }),
+	body('min_players')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Min players: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Min players: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('max_players')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Max players: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Max players: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('min_playing_time')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Min playing time: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Min playing time: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('max_playing_time')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Max playing time: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Max playing time: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
+	body('weight')
+		.trim()
+		.escape()
+		.isNumeric()
+		.withMessage('Weight: You must enter a number format')
+		.isInt({ min: 0 })
+		.withMessage('Weight: You must enter a number greater than 0')
+		.optional({ checkFalsy: true }),
 	(req, res, next) => {
 		const errors = validationResult(req);
 
 		const boardgame = new Boardgame({
-			name: req.body.name,
-			website: req.body.website,
+			title: req.body.title,
+			release_year: req.body.release_year || undefined,
+			designers: req.body.designers,
+			publishers: req.body.publishers,
+			description: {
+				short: req.body.short_description,
+				full: req.body.full_description,
+			},
+			number_of_players: {
+				min: req.body.min_players || undefined,
+				max: req.body.max_players || undefined,
+			},
+			playing_time: {
+				min: req.body.min_playing_time || undefined,
+				max: req.body.max_playing_time || undefined,
+			},
+			weight: req.body.weight || undefined,
+			categories: req.body.categories,
 			_id: req.params.id,
 		});
 
 		if (!errors.isEmpty()) {
-			// There are errors. Render form again with sanitized values/errors messages.
-			res.render('boardgame_form', {
-				title: 'Update Boardgame',
-				boardgame,
-				errors: errors.array(),
-			});
+			async.parallel(
+				{
+					designers(callback) {
+						Designer.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+					publishers(callback) {
+						Publisher.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+					categories(callback) {
+						Category.find()
+							.sort([['name', 'ascending']])
+							.exec(callback);
+					},
+				},
+				(err, results) => {
+					if (err) {
+						return next(err);
+					}
+
+					// Mark selected designers, publishers and categories as checked
+					for (const designer of results.designers) {
+						if (boardgame.designers.includes(designer._id)) {
+							designer.checked = 'true';
+						}
+					}
+					for (const publisher of results.publishers) {
+						if (boardgame.publishers.includes(publisher._id)) {
+							publisher.checked = 'true';
+						}
+					}
+					for (const category of results.categories) {
+						if (boardgame.categories.includes(category._id)) {
+							category.checked = 'true';
+						}
+					}
+					// There are errors. Render form again with sanitized values/errors messages.
+					res.render('boardgame_form', {
+						title: 'Create Boardgame',
+						boardgame,
+						designers: results.designers,
+						publishers: results.publishers,
+						categories: results.categories,
+						errors: errors.array(),
+					});
+				}
+			);
 			return;
 		}
 		// Data from form is valid.
-
 		Boardgame.findByIdAndUpdate(
 			req.params.id,
 			boardgame,
