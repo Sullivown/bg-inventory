@@ -1,0 +1,29 @@
+extends layout
+
+block content
+
+	h1=title
+
+	form(method='POST' action='')
+		div.form-group
+			label(for='boardgame') Board Game:
+		select#boardgame.form-control(type='select' placeholder='Select boardgame' name='boardgame' required='true' )
+			for boardgame in boardgames
+				if boardgameinstance
+					//- Handle GET form, where boardgameinstance.boardgame is an object, and POST form, where it is a string.
+					option(
+					value=boardgame._id
+					selected=(
+						boardgame._id.toString()==boardgameinstance.boardgame._id
+						|| boardgame._id.toString()==boardgameinstance.boardgame
+					) ? 'selected' : false
+					) #{boardgame.title}
+				else
+					option(value=boardgame._id) #{boardgame.title}
+
+		button.btn.btn-primary(type='submit') Submit
+	
+	if errors
+		ul
+			for error in errors
+				li!= error.msg

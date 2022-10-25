@@ -1,0 +1,24 @@
+extends layout 
+
+block content 
+	h1= title 
+
+	h2 ID: #{boardgameinstance.id}
+	
+	p Board Game: 
+		a(href=boardgameinstance.boardgame.url) #{boardgameinstance.boardgame.title}
+	p Status: #{boardgameinstance.status} 
+	p Due Back: #{boardgameinstance.due_back} 
+	p Created on #{boardgameinstance.created} 
+	
+	hr
+	p Are you sure you want to delete this board game instance?
+
+	form(method='POST' action='')
+		div.form-group
+			input#boardgameinstanceid.form-control(type='hidden',name='boardgameinstanceid', required='true', value=boardgameinstance._id )
+
+		button.btn.btn-primary(type='submit') Delete
+
+	form(method='GET' action=boardgameinstance.url)
+		button.btn.btn-primary(type='submit') Cancel

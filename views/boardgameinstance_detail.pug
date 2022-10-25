@@ -1,0 +1,19 @@
+extends layout 
+
+block content
+	h1= title 
+
+	h2 ID: #{boardgameinstance.id}
+	
+	p Board Game: 
+		a(href=boardgameinstance.boardgame.url) #{boardgameinstance.boardgame.title}
+	p Status: #{boardgameinstance.status} 
+	p Due Back: #{boardgameinstance.due_back} 
+	p Created on #{boardgameinstance.created} 
+	
+	hr
+	a(href=`${boardgameinstance.url}/update`) Update Board Game Instance
+	|
+	|
+
+	a(href=`${boardgameinstance.url}/delete`) Delete Board Game Instance

@@ -234,7 +234,6 @@ exports.boardgame_create_post = [
 
 		// Otherwise form is valid
 		// Create new boardgame and redirect to detail view on success
-
 		boardgame.save((err) => {
 			if (err) {
 				return next(err);
@@ -307,7 +306,7 @@ exports.boardgame_update_get = function (req, res, next) {
 			}
 
 			res.render('boardgame_form', {
-				title: 'Boardgame Detail',
+				title: 'Update Boardgame',
 				boardgame: results.boardgame,
 				designers: results.designers,
 				publishers: results.publishers,
@@ -462,7 +461,7 @@ exports.boardgame_update_post = [
 					}
 					// There are errors. Render form again with sanitized values/errors messages.
 					res.render('boardgame_form', {
-						title: 'Create Boardgame',
+						title: 'Update Boardgame',
 						boardgame,
 						designers: results.designers,
 						publishers: results.publishers,
